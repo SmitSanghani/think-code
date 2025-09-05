@@ -8,33 +8,66 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// MongoDB connection
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => {
-  console.log('✅ MongoDB Atlas connected successfully!');
-})
-.catch((error) => {
-  console.error('❌ MongoDB connection failed!', error.message);
-});
+// MongoDB connection with better error handling
+const connectDB = async () => {
+  try {
+    if (process.env.MONGODB_URI) {
+      await mongoose.connect(process.env.MONGODB_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      });
+      console.log('✅ MongoDB Atlas connected successfully!');
+    } else {
+      console.log('⚠️ MONGODB_URI not found, using fallback');
+    }
+  } catch (error) {
+    console.error('❌ MongoDB connection failed!', error.message);
+  }
+};
 
-// Import models
-const Admin = require('../backend/models/Admin');
-const Question = require('../backend/models/Question');
-const Submission = require('../backend/models/Submission');
-const Student = require('../backend/models/Student');
-const Registration = require('../backend/models/registration');
+// Connect to MongoDB
+connectDB();
+
+// Import models with error handling
+let Admin, Question, Submission, Student, Registration;
+
+try {
+  Admin = require('../backend/models/Admin');
+  Question = require('../backend/models/Question');
+  Submission = require('../backend/models/Submission');
+  Student = require('../backend/models/Student');
+  Registration = require('../backend/models/registration');
+} catch (error) {
+  console.error('Error loading models:', error.message);
+}
 
 // Healthcheck
 app.get(['/api/health', '/health'], (_req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
 });
 
+// Test endpoint
+app.get('/api/test', (_req, res) => {
+  res.json({ 
+    message: 'API is working!', 
+    models: {
+      Admin: !!Admin,
+      Question: !!Question,
+      Submission: !!Submission,
+      Student: !!Student,
+      Registration: !!Registration
+    },
+    mongo: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  });
+});
+
 // Admin login route
 app.post('/api/admin/login', async (req, res) => {
   try {
+    if (!Admin) {
+      return res.status(500).json({ error: 'Database models not loaded' });
+    }
+    
     const { email, password } = req.body;
     const admin = await Admin.findOne({ email });
     
@@ -50,6 +83,7 @@ app.post('/api/admin/login', async (req, res) => {
     const token = jwt.sign({ aid: String(admin._id), email: admin.email, role: 'admin' }, process.env.JWT_SECRET || 'dev_secret', { expiresIn: '7d' });
     res.json({ message: 'Login successful', token });
   } catch (error) {
+    console.error('Admin login error:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -258,5 +292,16 @@ function computeGrade(difficulty) {
       return 'B';
   }
 }
+
+// Error handling middleware
+app.use((error, req, res, next) => {
+  console.error('Unhandled error:', error);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
+// Catch-all handler
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found' });
+});
 
 module.exports = app;
