@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import API_BASE_URL from "./apiConfig";
 
 export default function StudentLogin({ onLogin, onClose, mode: initialMode = 'register' }) {
   const [email, setEmail] = useState("");
@@ -22,38 +23,18 @@ export default function StudentLogin({ onLogin, onClose, mode: initialMode = 're
     boxSizing: 'border-box'
   };
 
-  const requestVariants = async (paths, payload) => {
-    const origin = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
-    const bases = [
-      (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE_URL) || '',
-      'http://localhost:5000',
-      'http://127.0.0.1:5000',
-      origin
-    ].filter(Boolean);
-
-    const urls = [];
-    // Relative variants first (supports proxy setups)
-    paths.forEach(p => { urls.push(p); urls.push(`/api${p.startsWith('/') ? '' : '/'}${p.replace(/^\//,'')}`); });
-    bases.forEach(base => {
-      paths.forEach(p => { urls.push(`${base}${p}`); urls.push(`${base}/api${p}`); });
-    });
-
-    let last = { ok: false, status: 0, data: null };
-    for (const url of urls) {
-      try {
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json().catch(() => ({}));
-        if (res.ok) return { ok: true, status: res.status, data };
-        last = { ok: false, status: res.status, data };
-      } catch (e) {
-        last = { ok: false, status: 0, data: { error: e.message } };
-      }
+  const makeRequest = async (endpoint, payload) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json().catch(() => ({}));
+      return { ok: res.ok, status: res.status, data };
+    } catch (e) {
+      return { ok: false, status: 0, data: { error: e.message } };
     }
-    return last;
   };
 
   const handleSubmit = async (e) => {
@@ -79,7 +60,7 @@ export default function StudentLogin({ onLogin, onClose, mode: initialMode = 're
     try {
       setLoading(true);
       if (mode === 'register') {
-        const regResp = await requestVariants(['/registration'], { fullName: name, username, email, phone, gender, password, confirmPassword });
+        const regResp = await makeRequest('/registration', { fullName: name, username, email, phone, gender, password, confirmPassword });
         if (regResp.ok) {
           try { sessionStorage.setItem('studentEmail', email); } catch (_) {}
           onLogin({ email, student: { email, name, username }, isTemporarySession: true });
@@ -93,7 +74,7 @@ export default function StudentLogin({ onLogin, onClose, mode: initialMode = 're
         }
         setError(regResp.data?.error || 'Unable to register. Please try again.');
       } else {
-        const loginResp = await requestVariants(['/students/login'], { email, password });
+        const loginResp = await makeRequest('/students/login', { email, password });
         if (loginResp.ok) {
           try { localStorage.setItem('studentEmail', email); } catch (_) {}
           try { if (loginResp.data?.student?._id) localStorage.setItem('studentId', loginResp.data.student._id); } catch (_) {}

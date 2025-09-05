@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import API_BASE_URL from "./apiConfig";
 
 // Tag/Badge component for level/category
 function Badge({ children, color }) {
@@ -43,7 +44,7 @@ export default function AdminDashboard({ onLogout, onOpenSubmissions }) {
     (async () => {
       // 1) Users count from backend (preferred)
       try {
-        const r = await fetch('http://localhost:5000/api/students/count');
+        const r = await fetch(`${API_BASE_URL}/students/count`);
         if (r.ok) {
           const j = await r.json();
           if (typeof j.count === 'number') setUsersCount(j.count);
@@ -52,7 +53,7 @@ export default function AdminDashboard({ onLogout, onOpenSubmissions }) {
 
       let subs = [];
       try {
-        const res = await fetch('http://localhost:5000/api/submissions');
+        const res = await fetch(`${API_BASE_URL}/submissions`);
         if (res.ok) {
           const list = await res.json();
           subs = Array.isArray(list) ? list : [];
@@ -77,7 +78,7 @@ export default function AdminDashboard({ onLogout, onOpenSubmissions }) {
               .filter((e) => typeof e === 'string' && e.trim().length > 0)
           );
           if (usersSet.size === 0) {
-            const res2 = await fetch('http://localhost:5000/api/stats/students');
+            const res2 = await fetch(`${API_BASE_URL}/stats/students`);
             if (res2.ok) {
               const agg = await res2.json();
               if (Array.isArray(agg)) {
@@ -96,7 +97,7 @@ export default function AdminDashboard({ onLogout, onOpenSubmissions }) {
       console.log('🔄 Fetching questions from MongoDB API...');
       
       // First try to get questions from MongoDB API
-      const response = await fetch('http://localhost:5000/api/questions');
+      const response = await fetch(`${API_BASE_URL}/questions`);
       if (response.ok) {
         const data = await response.json();
         console.log('✅ Questions loaded from MongoDB:', data);
@@ -171,7 +172,7 @@ export default function AdminDashboard({ onLogout, onOpenSubmissions }) {
 
   const fetchStats = async () => {
     try {
-      const r = await fetch('http://localhost:5000/api/students/count', { cache: 'no-store' });
+      const r = await fetch(`${API_BASE_URL}/students/count`, { cache: 'no-store' });
       if (r.ok) {
         const j = await r.json();
         if (typeof j.count === 'number') setUsersCount(j.count);
@@ -180,7 +181,7 @@ export default function AdminDashboard({ onLogout, onOpenSubmissions }) {
 
     let subs = [];
     try {
-      const res = await fetch('http://localhost:5000/api/submissions', { cache: 'no-store' });
+      const res = await fetch(`${API_BASE_URL}/submissions`, { cache: 'no-store' });
       if (res.ok) {
         const list = await res.json();
         subs = Array.isArray(list) ? list : [];
@@ -202,7 +203,7 @@ export default function AdminDashboard({ onLogout, onOpenSubmissions }) {
           .filter((e) => typeof e === 'string' && e.trim().length > 0)
       );
       if (usersSet.size === 0) {
-        const res2 = await fetch('http://localhost:5000/api/stats/students', { cache: 'no-store' });
+        const res2 = await fetch(`${API_BASE_URL}/stats/students`, { cache: 'no-store' });
         if (res2.ok) {
           const agg = await res2.json();
           if (Array.isArray(agg)) {
@@ -232,7 +233,7 @@ export default function AdminDashboard({ onLogout, onOpenSubmissions }) {
     try {
       if (editingQuestion) {
         // Update existing question in MongoDB
-        const response = await fetch(`http://localhost:5000/api/questions/${editingQuestion._id}`, {
+        const response = await fetch(`${API_BASE_URL}/questions/${editingQuestion._id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -253,7 +254,7 @@ export default function AdminDashboard({ onLogout, onOpenSubmissions }) {
         setEditingQuestion(null);
       } else {
         // Create new question in MongoDB
-        const response = await fetch('http://localhost:5000/api/questions', {
+        const response = await fetch(`${API_BASE_URL}/questions`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -311,7 +312,7 @@ export default function AdminDashboard({ onLogout, onOpenSubmissions }) {
   const handleDelete = async (questionId) => {
     if (window.confirm('Are you sure you want to delete this question?')) {
       try {
-        const response = await fetch(`http://localhost:5000/api/questions/${questionId}`, {
+        const response = await fetch(`${API_BASE_URL}/questions/${questionId}`, {
           method: 'DELETE'
         });
         

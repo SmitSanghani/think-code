@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import API_BASE_URL from './apiConfig';
 
 export default function StudentProfile({ studentEmail, onBack }) {
   const [loading, setLoading] = useState(true);
@@ -8,7 +9,7 @@ export default function StudentProfile({ studentEmail, onBack }) {
     setLoading(true);
     try {
       if (studentEmail) {
-        const res = await fetch(`http://localhost:5000/api/students/${encodeURIComponent(studentEmail)}/stats`, {
+        const res = await fetch(`${API_BASE_URL}/students/${encodeURIComponent(studentEmail)}/stats`, {
           headers: { 'Cache-Control': 'no-cache' }
         });
         if (res.ok) {
