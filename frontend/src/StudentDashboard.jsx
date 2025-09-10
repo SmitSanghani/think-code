@@ -13,7 +13,7 @@ export default function StudentDashboard({ onStartProblem, studentEmail, onBack,
   const fetchProblems = async () => {
     try {
       // Always try MongoDB API first so latest changes are shown
-      const response = await fetch(`${API_BASE_URL}/api/questions?t=${Date.now()}`, {
+      const response = await fetch(`${API_BASE_URL}/questions?t=${Date.now()}`, {
         cache: 'no-store',
         headers: { 'Cache-Control': 'no-cache' }
       });
