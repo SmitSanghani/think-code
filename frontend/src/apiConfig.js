@@ -1,6 +1,4 @@
 // API Configuration for different environments
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://think-code-five.vercel.app/api' 
-  : 'http://localhost:5000/api';
+const API_BASE_URL = 'https://think-code.onrender.com/api'
 
 export default API_BASE_URL;
