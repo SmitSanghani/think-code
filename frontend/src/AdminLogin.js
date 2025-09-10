@@ -14,7 +14,7 @@ export default function AdminLogin({ onLogin, onClose }) {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/admin/login`, {
+      const response = await fetch(`${API_BASE_URL}/admin/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
