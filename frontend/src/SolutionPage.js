@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import API_BASE_URL from "./apiConfig";
 
 export default function SolutionPage({ question, onBack, studentEmail }) {
   const [loadedQuestion, setLoadedQuestion] = useState(question || null);
@@ -61,7 +62,7 @@ export default function SolutionPage({ question, onBack, studentEmail }) {
         const id = q?._id;
         const title = (q?.title || '').trim();
         if (id) {
-          const resOne = await fetch(`http://localhost:5000/api/questions/${id}?t=${Date.now()}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
+          const resOne = await fetch(`${API_BASE_URL}/api/questions/${id}?t=${Date.now()}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
           if (resOne.ok) {
             const doc = await resOne.json();
             if (!cancelled && doc) {
@@ -71,7 +72,7 @@ export default function SolutionPage({ question, onBack, studentEmail }) {
           }
         }
         // Fallback to list lookup by title if id fetch failed
-        const res = await fetch(`http://localhost:5000/api/questions?t=${Date.now()}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
+        const res = await fetch(`${API_BASE_URL}/api/questions?t=${Date.now()}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
         if (!res.ok) return;
         const list = await res.json();
         if (!Array.isArray(list)) return;
@@ -92,7 +93,7 @@ export default function SolutionPage({ question, onBack, studentEmail }) {
       const id = q?._id;
       if (!id) return;
       try {
-        const res = await fetch(`http://localhost:5000/api/questions/${id}?t=${Date.now()}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
+        const res = await fetch(`${API_BASE_URL}/api/questions/${id}?t=${Date.now()}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
         if (!res.ok) return;
         const doc = await res.json();
         if (!cancelled && doc) setLoadedQuestion(doc);
@@ -408,7 +409,7 @@ export default function SolutionPage({ question, onBack, studentEmail }) {
         // environment override
         (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE_URL) || '',
         // common localhost bases
-        'http://localhost:5000',
+        `${API_BASE_URL}`,
         'http://127.0.0.1:5000',
         pageOrigin
       ].filter(Boolean);

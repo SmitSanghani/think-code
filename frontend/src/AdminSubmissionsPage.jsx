@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import API_BASE_URL from './apiConfig';
 
 export default function AdminSubmissionsPage({ onBack }) {
   const [submissions, setSubmissions] = useState([]);
@@ -10,11 +11,11 @@ export default function AdminSubmissionsPage({ onBack }) {
 
   const load = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/submissions');
+      const res = await fetch(`${API_BASE_URL}/api/submissions`);
       if (res.ok) setSubmissions(await res.json());
     } catch (e) { /* no-op */ }
     try {
-      const res2 = await fetch('http://localhost:5000/api/stats/students');
+      const res2 = await fetch(`${API_BASE_URL}/api/stats/students`);
       if (res2.ok) setStudentStats(await res2.json());
     } catch (e) { /* no-op */ }
     // Merge local offline submissions
@@ -30,7 +31,7 @@ export default function AdminSubmissionsPage({ onBack }) {
     const origin = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
     const bases = [
       (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_BASE_URL) || '',
-      'http://localhost:5000',
+      `${API_BASE_URL}`,
       'http://127.0.0.1:5000',
       origin
     ].filter(Boolean);
@@ -116,7 +117,7 @@ export default function AdminSubmissionsPage({ onBack }) {
       }
 
       // Otherwise, send to backend
-      const res = await fetch(`http://localhost:5000/api/submissions/${selected._id}/grade`, {
+      const res = await fetch(`${API_BASE_URL}/api/submissions/${selected._id}/grade`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ grade, feedback })
