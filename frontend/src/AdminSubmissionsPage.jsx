@@ -11,11 +11,11 @@ export default function AdminSubmissionsPage({ onBack }) {
 
   const load = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/submissions`);
+      const res = await fetch(`${API_BASE_URL}/submissions`);
       if (res.ok) setSubmissions(await res.json());
     } catch (e) { /* no-op */ }
     try {
-      const res2 = await fetch(`${API_BASE_URL}/api/stats/students`);
+      const res2 = await fetch(`${API_BASE_URL}/stats/students`);
       if (res2.ok) setStudentStats(await res2.json());
     } catch (e) { /* no-op */ }
     // Merge local offline submissions
@@ -117,7 +117,7 @@ export default function AdminSubmissionsPage({ onBack }) {
       }
 
       // Otherwise, send to backend
-      const res = await fetch(`${API_BASE_URL}/api/submissions/${selected._id}/grade`, {
+      const res = await fetch(`${API_BASE_URL}/submissions/${selected._id}/grade`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ grade, feedback })
